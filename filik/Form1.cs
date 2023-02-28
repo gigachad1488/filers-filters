@@ -10,14 +10,66 @@ using System.Windows.Forms;
 
 namespace filik
 {
+
+    enum SortKind
+    {
+        Name,
+        Type,
+        Date
+    }
+
     public partial class Form1 : Form
     {
+
+        private List<File> currenttable = new List<File>();
+
+        private List<File> Currenttable
+        {
+            get
+            {
+                return currenttable;
+            }
+            set
+            {
+                switch (sortkind)
+                { 
+                    case SortKind.Name:
+                        if (sortside)
+                            currenttable = value.OrderBy(s => s.Name).ToList();
+                        else
+                            currenttable = value.OrderByDescending(s => s.Name).ToList();
+                        break;
+                    case SortKind.Type:
+                        if (sortside)
+                            currenttable = value.OrderBy(s => s.Type).ToList();
+                        else
+                            currenttable = value.OrderByDescending(s => s.Type).ToList();
+                        break;
+                    case SortKind.Date:
+                        if (sortside)
+                            currenttable = value.OrderBy(s => s.Time).ToList();
+                        else
+                            currenttable = value.OrderByDescending(s => s.Time).ToList();
+                        break;
+                }
+                dataGridView.DataSource = currenttable;
+            }
+        }
+        private SortKind sortkind;
+
+        //true = по возрастанию, false = по убыванию
+        private bool sortside;
         public Form1()
         {
+            
             InitializeComponent();
             AllFiles.init();
-            comboBox1.Items.Add("нет");
-            comboBox1.Items.AddRange(FileTypes.types);
+            sortkind = SortKind.Name;
+            sortside = true;         
+            Currenttable = AllFiles.allfiles;          
+            TypecomboBox.Items.Add("нет");
+            TypecomboBox.Items.AddRange(FileTypes.types);
+            TypecomboBox.SelectedIndex = 0;
             BaseTable();
         }
 
@@ -28,39 +80,83 @@ namespace filik
 
         public void BaseTable()
         {
-            dataGridView1.DataSource = AllFiles.allfiles;
+            dataGridView.DataSource = AllFiles.allfiles;
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void NametextBox_TextChanged(object sender, EventArgs e)
         {
-            var tx = AllFiles.allfiles.Where(s => s.Name.ToLower().Contains(textBox1.Text.ToLower())).ToList();
-            dataGridView1.DataSource = tx;
+            var tx = AllFiles.allfiles.Where(s => s.Name.ToLower().Contains(NametextBox.Text.ToLower())).ToList();
+            Currenttable = tx;
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void TypecomboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBox1.SelectedIndex == 0)
+            if (TypecomboBox.SelectedIndex == 0)
             {
                 BaseTable();
                 return;
             }
-            var typ = AllFiles.allfiles.Where(s => s.Type == comboBox1.SelectedItem.ToString()).ToList();
-            dataGridView1.DataSource = typ;
+            var typ = AllFiles.allfiles.Where(s => s.Type == TypecomboBox.SelectedItem.ToString()).ToList();
+            Currenttable = typ;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            textBox1.Clear();
-            comboBox1.SelectedIndex = 0;
-            dateTimePicker1.Value = DateTime.Now;
+            NametextBox.Clear();
+            TypecomboBox.SelectedIndex = 0;
+            dateTimePicker.Value = DateTime.Now;
+            sortkind = SortKind.Name;
+            sortside = true;
             BaseTable();
         }
 
-        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        private void dateTimePicker_ValueChanged(object sender, EventArgs e)
         {
-            DateTime tim = dateTimePicker1.Value;
+            DateTime tim = dateTimePicker.Value;
             var tims = AllFiles.allfiles.Where(s => s.Time.CompareTo(tim) < 0).ToList();
-            dataGridView1.DataSource = tims;
+            Currenttable = tims;
+        }
+
+        private void возрастаниеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            sortside = true;
+            sortkind = SortKind.Name;
+            Currenttable = Currenttable;
+        }
+
+        private void убываниеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            sortside = false;
+            sortkind = SortKind.Name;
+            Currenttable = Currenttable;
+        }
+
+        private void возрастаниеToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            sortside = true;
+            sortkind = SortKind.Type;
+            Currenttable = Currenttable;
+        }
+
+        private void убываниеToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            sortside = false;
+            sortkind = SortKind.Type;
+            Currenttable = Currenttable;
+        }
+
+        private void возрастаниеToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            sortside = true;
+            sortkind = SortKind.Date;
+            Currenttable = Currenttable;
+        }
+
+        private void убываниеToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            sortside = false;
+            sortkind = SortKind.Date;
+            Currenttable = Currenttable;
         }
     }
 }
